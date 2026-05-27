@@ -35,3 +35,22 @@ export type AppNode = PromptNodeT | ToolNodeT | OutputNodeT;
 // "tool" is reserved for V2 agentic loops.
 export type EdgeType = "data" | "tool";
 export type AppEdge = Edge<Record<string, unknown>, EdgeType>;
+
+// ---- Runs & events (SPEC §4.3) ----
+// Node execution returns an async iterable of events, not a single output,
+// so a node can emit multiple events over time (forward-compat for V2 loops).
+export type NodeStatus =
+  | "idle"
+  | "running"
+  | "complete"
+  | "error"
+  | "cancelled";
+export type RunStatus = NodeStatus;
+
+export type NodeEvent =
+  | { nodeId: string; kind: "start"; at: number }
+  | { nodeId: string; kind: "token"; text: string; at: number }
+  | { nodeId: string; kind: "tool_call"; tool: string; args: string; at: number }
+  | { nodeId: string; kind: "tool_result"; result: string; at: number }
+  | { nodeId: string; kind: "complete"; output: string; at: number }
+  | { nodeId: string; kind: "error"; message: string; at: number };

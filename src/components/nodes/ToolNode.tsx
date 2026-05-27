@@ -1,7 +1,9 @@
 import type { NodeProps } from "@xyflow/react";
 import type { ToolNodeT, ToolName } from "@/lib/types";
 import { useGraphStore } from "@/store/graphStore";
+import { useNodeRun } from "@/store/runStore";
 import NodeShell, { fieldLabelClass, inputClass } from "./NodeShell";
+import OutputPanel from "./OutputPanel";
 
 const TOOLS: { value: ToolName; label: string; hint: string }[] = [
   { value: "web_search", label: "Web Search (Tavily)", hint: "query" },
@@ -10,6 +12,7 @@ const TOOLS: { value: ToolName; label: string; hint: string }[] = [
 
 export default function ToolNode({ id, data, selected }: NodeProps<ToolNodeT>) {
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
+  const { status, output, error } = useNodeRun(id);
   const active = TOOLS.find((t) => t.value === data.tool) ?? TOOLS[0];
 
   return (
@@ -17,6 +20,7 @@ export default function ToolNode({ id, data, selected }: NodeProps<ToolNodeT>) {
       title={data.label}
       icon="⚙"
       accent="bg-amber-500/20 text-amber-200"
+      status={status}
       selected={selected}
     >
       <label className={fieldLabelClass}>Tool</label>
@@ -41,6 +45,8 @@ export default function ToolNode({ id, data, selected }: NodeProps<ToolNodeT>) {
         onChange={(e) => updateNodeData(id, { inputOverride: e.target.value })}
         placeholder="Defaults to upstream output ({{input}})"
       />
+
+      <OutputPanel status={status} output={output} error={error} />
     </NodeShell>
   );
 }
