@@ -1,7 +1,9 @@
 import type { NodeProps } from "@xyflow/react";
 import type { PromptNodeT } from "@/lib/types";
 import { useGraphStore } from "@/store/graphStore";
+import { useNodeRun } from "@/store/runStore";
 import NodeShell, { fieldLabelClass, inputClass } from "./NodeShell";
+import OutputPanel from "./OutputPanel";
 
 const MODELS = [
   "claude-sonnet-4-6",
@@ -13,12 +15,14 @@ const MODELS = [
 
 export default function PromptNode({ id, data, selected }: NodeProps<PromptNodeT>) {
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
+  const { status, output, error } = useNodeRun(id);
 
   return (
     <NodeShell
       title={data.label}
       icon="✦"
       accent="bg-indigo-500/20 text-indigo-200"
+      status={status}
       selected={selected}
     >
       <label className={fieldLabelClass}>Prompt</label>
@@ -71,6 +75,8 @@ export default function PromptNode({ id, data, selected }: NodeProps<PromptNodeT
           />
         </div>
       </div>
+
+      <OutputPanel status={status} output={output} error={error} />
     </NodeShell>
   );
 }
