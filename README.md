@@ -8,7 +8,7 @@ Drag out boxes — **prompts, tool calls, outputs** — connect them with arrows
 
 ![Agent Canvas running the demo flow](./public/og.png)
 
-**[▶ Live demo](https://agent-canvas.vercel.app)** · [Spec](./SPEC.md) · [Milestones](./PLAN.md)
+**[▶ Live demo](https://agent-canvas-three.vercel.app)** · [Spec](./SPEC.md) · [Milestones](./PLAN.md)
 
 > The live demo runs in **scripted mode** — real recorded output streams in with no API key needed. Add your own key in **Settings** to run flows against real models and tools.
 
