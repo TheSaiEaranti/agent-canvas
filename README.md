@@ -89,7 +89,7 @@ Keys live only in your browser (localStorage) and are sent per-request to the pr
 | State | Zustand |
 | Styling | Tailwind CSS |
 | LLMs | `@anthropic-ai/sdk`, `openai` (streaming) |
-| Tools | Tavily (search), Mozilla Readability + jsdom (URL fetch) |
+| Tools | Tavily (search), Mozilla Readability + linkedom (URL fetch) |
 | Tests | Playwright (headless smoke test) |
 
 ## Roadmap (V2)
@@ -106,4 +106,4 @@ V1 ships a linear DAG. The data model and executor are built for what comes next
 
 ---
 
-<sub>Built as a portfolio project. 🤖 Developed with [Claude Code](https://claude.com/claude-code).</sub>
+<sub>Built as a portfolio project.</sub>
