@@ -11,3 +11,61 @@ body {
   color: #e5e9f0;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+/* ---- Execution visual states (SPEC §8) ---- */
+
+@keyframes nodeGlowRunning {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.55),
+      0 0 18px rgba(56, 189, 248, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.95),
+      0 0 32px rgba(56, 189, 248, 0.6);
+  }
+}
+.node-glow-running {
+  animation: nodeGlowRunning 1.4s ease-in-out infinite;
+}
+
+@keyframes nodeGlowError {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(244, 63, 94, 0.5),
+      0 0 14px rgba(244, 63, 94, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(244, 63, 94, 0.85),
+      0 0 26px rgba(244, 63, 94, 0.45);
+  }
+}
+.node-glow-error {
+  animation: nodeGlowError 1.6s ease-in-out infinite;
+}
+
+@keyframes runPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(34, 197, 94, 0);
+  }
+}
+.run-pulse {
+  animation: runPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+.cursor-blink {
+  animation: cursorBlink 1s step-start infinite;
+}
