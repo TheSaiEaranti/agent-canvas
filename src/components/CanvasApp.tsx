@@ -102,9 +102,6 @@ export default function CanvasApp() {
         <div className="flex items-center gap-2">
           <span className="text-lg">🧩</span>
           <h1 className="text-sm font-semibold text-slate-100">Agent Canvas</h1>
-          <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-300">
-            M3
-          </span>
           <span
             className={`ml-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${RUN_PILL[runStatus]}`}
           >
