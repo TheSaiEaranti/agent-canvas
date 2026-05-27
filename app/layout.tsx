@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://agent-canvas.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://agent-canvas-three.vercel.app";
 const DESCRIPTION =
   "A visual canvas for composing and debugging AI agents. Drag out prompt, tool, and output nodes, wire them up, hit Run, and watch the agent execute — output streaming into each box as it goes.";
 
