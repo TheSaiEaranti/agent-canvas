@@ -8,7 +8,7 @@ import OutputPanel from "./OutputPanel";
 const MODELS = [
   "claude-sonnet-4-6",
   "claude-opus-4-7",
-  "claude-haiku-4-5-20251001",
+  "claude-haiku-4-5",
   "gpt-4o",
   "gpt-4o-mini",
 ];

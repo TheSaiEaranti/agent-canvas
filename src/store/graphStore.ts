@@ -22,7 +22,30 @@ type GraphState = {
   addNode: (type: NodeType, position: { x: number; y: number }) => void;
   updateNodeData: (id: string, patch: Partial<NodeData>) => void;
   resetToDemo: () => void;
+  importGraph: (data: unknown) => boolean;
 };
+
+function isValidGraph(
+  data: unknown,
+): data is { nodes: AppNode[]; edges: AppEdge[] } {
+  if (!data || typeof data !== "object") return false;
+  const { nodes, edges } = data as { nodes?: unknown; edges?: unknown };
+  if (!Array.isArray(nodes) || !Array.isArray(edges)) return false;
+  const validNodes = nodes.every(
+    (n) =>
+      n &&
+      typeof n.id === "string" &&
+      typeof n.type === "string" &&
+      n.position &&
+      typeof n.position.x === "number" &&
+      typeof n.position.y === "number" &&
+      typeof n.data === "object",
+  );
+  const validEdges = edges.every(
+    (e) => e && typeof e.source === "string" && typeof e.target === "string",
+  );
+  return validNodes && validEdges;
+}
 
 export const useGraphStore = create<GraphState>()(
   persist(
@@ -64,6 +87,12 @@ export const useGraphStore = create<GraphState>()(
         }),
 
       resetToDemo: () => set({ nodes: demoNodes, edges: demoEdges }),
+
+      importGraph: (data) => {
+        if (!isValidGraph(data)) return false;
+        set({ nodes: data.nodes, edges: data.edges });
+        return true;
+      },
     }),
     {
       name: "agent-canvas-graph",

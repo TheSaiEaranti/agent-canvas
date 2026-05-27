@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import type { NodeEvent, NodeStatus, RunStatus } from "@/lib/types";
 import { useGraphStore } from "./graphStore";
+import { useSettingsStore } from "./settingsStore";
 import { executeGraph } from "@/lib/run/executor";
 import { scriptedProvider } from "@/lib/run/scriptedProvider";
+import { createRealProvider } from "@/lib/run/realProvider";
 
 // AbortController is non-serializable and the run store is in-memory only
 // (SPEC §4.4 / §7), so we keep the controller in a module ref, not in state.
@@ -94,11 +96,23 @@ export const useRunStore = create<RunState>((set, get) => ({
     abortController = controller;
     set({ runStatus: "running", hasRun: true });
 
+    // Demo mode replays scripted output; live mode hits the proxy with the
+    // user's keys. Both implement the same RunProvider interface (SPEC §6).
+    const settings = useSettingsStore.getState();
+    const provider =
+      settings.mode === "live"
+        ? createRealProvider({
+            anthropic: settings.anthropicKey,
+            openai: settings.openaiKey,
+            tavily: settings.tavilyKey,
+          })
+        : scriptedProvider;
+
     try {
       for await (const ev of executeGraph(
         nodes,
         edges,
-        scriptedProvider,
+        provider,
         controller.signal,
       )) {
         get().applyEvent(ev);

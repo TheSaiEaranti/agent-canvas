@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import Canvas from "./Canvas";
 import Palette from "./Palette";
+import SettingsPanel from "./SettingsPanel";
 import { useGraphStore } from "@/store/graphStore";
 import { useRunStore } from "@/store/runStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import type { RunStatus } from "@/lib/types";
 
 const RUN_LABEL: Record<RunStatus, string> = {
@@ -24,26 +26,76 @@ const RUN_PILL: Record<RunStatus, string> = {
   cancelled: "bg-slate-600 text-slate-300",
 };
 
+const secondaryBtn =
+  "rounded-md border border-slate-600 px-2.5 py-1 text-xs text-slate-200 transition-colors hover:border-sky-400 hover:text-white";
+
 export default function CanvasApp() {
   const [mounted, setMounted] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const resetToDemo = useGraphStore((s) => s.resetToDemo);
+  const importGraph = useGraphStore((s) => s.importGraph);
+  const nodeCount = useGraphStore((s) => s.nodes.length);
+
   const runStatus = useRunStore((s) => s.runStatus);
   const startRun = useRunStore((s) => s.startRun);
   const stopRun = useRunStore((s) => s.stopRun);
   const resetRun = useRunStore((s) => s.resetRun);
 
+  const mode = useSettingsStore((s) => s.mode);
+
   useEffect(() => {
     void useGraphStore.persist.rehydrate();
+    void useSettingsStore.persist.rehydrate();
     setMounted(true);
   }, []);
 
   const isRunning = runStatus === "running";
 
+  const handleRun = () => {
+    const s = useSettingsStore.getState();
+    if (s.mode === "live" && !s.anthropicKey && !s.openaiKey && !s.tavilyKey) {
+      setSettingsOpen(true);
+      return;
+    }
+    startRun();
+  };
+
+  const handleExport = () => {
+    const { nodes, edges } = useGraphStore.getState();
+    const blob = new Blob([JSON.stringify({ nodes, edges }, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "agent-canvas-flow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (importGraph(data)) {
+        resetRun();
+      } else {
+        alert("That file doesn't look like a valid Agent Canvas flow.");
+      }
+    } catch {
+      alert("Could not parse that file as JSON.");
+    }
+  };
+
   return (
     <main
       data-run-status={runStatus}
+      data-run-mode={mode}
       className="relative h-screen w-screen overflow-hidden"
     >
       <header className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 py-3 backdrop-blur">
@@ -51,7 +103,7 @@ export default function CanvasApp() {
           <span className="text-lg">🧩</span>
           <h1 className="text-sm font-semibold text-slate-100">Agent Canvas</h1>
           <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-300">
-            M2
+            M3
           </span>
           <span
             className={`ml-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${RUN_PILL[runStatus]}`}
@@ -62,15 +114,36 @@ export default function CanvasApp() {
 
         <div className="flex items-center gap-2">
           <button
+            data-testid="settings-button"
+            onClick={() => setSettingsOpen(true)}
+            className={secondaryBtn}
+            title="API keys and run mode"
+          >
+            {mode === "live" ? "🟢 Live" : "◐ Demo"} · Settings
+          </button>
+          <button onClick={handleExport} className={secondaryBtn}>
+            Export
+          </button>
+          <button onClick={() => fileRef.current?.click()} className={secondaryBtn}>
+            Import
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
             onClick={() => {
               if (confirm("Reset the canvas to the demo flow?")) {
                 resetRun();
                 resetToDemo();
               }
             }}
-            className="rounded-md border border-slate-600 px-3 py-1 text-xs text-slate-200 transition-colors hover:border-sky-400 hover:text-white"
+            className={secondaryBtn}
           >
-            Reset to demo
+            Reset
           </button>
 
           {isRunning ? (
@@ -84,9 +157,15 @@ export default function CanvasApp() {
           ) : (
             <button
               data-testid="run-button"
-              onClick={startRun}
-              className={`rounded-md bg-emerald-500 px-4 py-1 text-xs font-semibold text-white transition-colors hover:bg-emerald-400 ${
-                runStatus === "idle" ? "run-pulse" : ""
+              onClick={handleRun}
+              disabled={nodeCount === 0}
+              title={nodeCount === 0 ? "Add a node to run" : undefined}
+              className={`rounded-md px-4 py-1 text-xs font-semibold text-white transition-colors ${
+                nodeCount === 0
+                  ? "cursor-not-allowed bg-slate-600 text-slate-400"
+                  : `bg-emerald-500 hover:bg-emerald-400 ${
+                      runStatus === "idle" ? "run-pulse" : ""
+                    }`
               }`}
             >
               ▶ Run
@@ -120,6 +199,8 @@ export default function CanvasApp() {
           </div>
         </div>
       )}
+
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </main>
   );
 }
