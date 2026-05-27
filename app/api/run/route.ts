@@ -1,10 +1,10 @@
 import type { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import { JSDOM } from "jsdom";
+import { parseHTML } from "linkedom";
 import { Readability } from "@mozilla/readability";
 
-// jsdom + Readability need the Node runtime, not Edge.
+// Readability needs a DOM (linkedom) + Node APIs, not the Edge runtime.
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
@@ -200,8 +200,8 @@ async function runTool(
     return;
   }
   const html = await res.text();
-  const dom = new JSDOM(html, { url: parsed.href });
-  const article = new Readability(dom.window.document).parse();
+  const { document } = parseHTML(html);
+  const article = new Readability(document as unknown as Document).parse();
   const content = (article?.textContent ?? "").trim();
   if (!content) {
     send({ type: "error", message: "Could not extract readable text from that page." });
