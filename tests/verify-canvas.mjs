@@ -100,6 +100,14 @@ async function testBrowser() {
     : fail(`output node missing result: ${outText.slice(0, 80)}`);
   await page.screenshot({ path: join(__dirname, "canvas-complete.png") });
 
+  // M2: Stop cancels an in-flight run
+  await page.getByTestId("run-button").click();
+  await page.waitForSelector('main[data-run-status="running"]', { timeout: 5000 });
+  await page.waitForTimeout(400);
+  await page.getByTestId("stop-button").click();
+  await page.waitForSelector('main[data-run-status="cancelled"]', { timeout: 5000 });
+  ok("Stop cancels an in-flight run");
+
   // M3: settings panel + live-mode no-key guard
   await page.getByTestId("settings-button").click();
   (await page.getByText("Anthropic API key").isVisible())

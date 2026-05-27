@@ -71,6 +71,18 @@ export default function Canvas() {
       <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
       <Controls />
       <MiniMap pannable zoomable className="!bg-slate-800" />
+      {nodes.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+          <div className="rounded-xl border border-dashed border-slate-600 bg-slate-800/70 px-6 py-4 text-center text-sm text-slate-400">
+            Canvas is empty.
+            <br />
+            <span className="text-slate-500">
+              Drag a node from the palette to begin — or hit Reset for the demo
+              flow.
+            </span>
+          </div>
+        </div>
+      )}
     </ReactFlow>
   );
 }
